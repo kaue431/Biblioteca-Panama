@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aluguel de Livros</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Aluguel de Livros na Biblioteca</h1>
+    </header>
+    <main>
+        <section id="livros">
+            <h2>Livros Disponíveis</h2>
+            <ul id="lista-livros">
+                <!-- Aqui serão listados os livros disponíveis -->
+            </ul>
+        </section>
+        <section id="aluguel">
+            <h2>Alugar Livro</h2>
+            <form id="form-aluguel">
+                <label for="nome">Seu Nome:</label>
+                <input type="text" id="nome" required>
+                <label for="sala">Sala:</label>
+                <input type="text" id="sala" required>
+                <label for="livro">Livro:</label>
+                <select id="livro" required>
+                    <!-- Aqui serão listadas as opções de livros disponíveis -->
+                </select>
+                <button type="submit">Alugar</button>
+            </form>
+        </section>
+    </main>
+    <section id="acesso-restrito">
+        <h2>Acesso Restrito</h2>
+        <form id="form-acesso">
+            <label for="senha">Senha:</label>
+            <input type="password" id="senha">
+            <button type="submit">Entrar</button>
+        </form>
+        <div id="admin-panel" style="display: none;">
+            <h3>Painel Administrativo</h3>
+            <form id="form-adicionar">
+                <h4>Adicionar Livro</h4>
+                <label for="tituloLivro">Título do Livro:</label>
+                <input type="text" id="tituloLivro" required>
+                <label for="generoLivro">Gênero:</label>
+                <input type="text" id="generoLivro" required>
+                <label for="quantidadeLivro">Quantidade:</label>
+                <input type="number" id="quantidadeLivro" required>
+                <button type="submit">Adicionar</button>
+            </form>
+            <form id="form-remover">
+                <h4>Remover Livro</h4>
+                <label for="livroId">ID do Livro:</label>
+                <input type="number" id="livroId" required>
+                <button type="submit">Remover</button>
+            </form>
+            <form id="form-devolucao">
+                <h4>Devolver Livro</h4>
+                <label for="codigoDevolucao">Código de Devolução:</label>
+                <input type="number" id="codigoDevolucao" required>
+                <button type="submit">Devolver</button>
+            </form>
+        </div>
+    </section>
+    <section id="tabela-alugueis">
+        <h2>Aluguéis</h2>
+        <table id="tabela">
+            <thead>
+                <tr>
+                    <th>Nome do Livro</th>
+                    <th>Nome do Aluguel</th>
+                    <th>Sala</th>
+                    <th>Data de Aluguel</th>
+                    <th>Data de Devolução</th>
+                    <th>Código de Devolução</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Aqui serão listados os aluguéis -->
+            </tbody>
+        </table>
+    </section>
+    <footer>
+        <p>&copy; JK em 2024</p>
+    </footer>
+    <script src="js/scripts.js"></script>
+</body>
+</html>

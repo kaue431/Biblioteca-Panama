@@ -20,6 +20,11 @@ jobs:
     - name: Install Dependencies
       run: npm install --verbose
 
+    - name: Verify Node.js and npm
+      run: |
+        node -v
+        npm -v
+
     - name: Build Project
       run: |
         echo "Build step started"

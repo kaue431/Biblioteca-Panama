@@ -1,0 +1,19 @@
+{
+  "name": "biblioteca-panama",
+  "version": "1.0.0",
+  "description": "Projeto de deploy no Firebase",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "build": "echo 'Build process...' && exit 0",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Seu Nome",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"  // Inclua as dependências que seu projeto necessita
+  },
+  "devDependencies": {
+    "firebase-tools": "^9.16.0" // Inclua aqui dependências de desenvolvimento, se necessário
+  }
+}

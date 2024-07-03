@@ -18,10 +18,15 @@ jobs:
         node-version: '14'
 
     - name: Install Dependencies
-      run: npm install
+      run: npm install --verbose
 
     - name: Build Project
-      run: npm run build
+      run: |
+        echo "Build step started"
+        npm run build
+
+    - name: Check Firebase Token
+      run: echo $FIREBASE_TOKEN
 
     - name: Deploy to Firebase
       env:

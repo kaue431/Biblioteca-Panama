@@ -1,16 +1,10 @@
 {
   "hosting": {
-    "public": "nome_do_seu_diretorio_de_hospedagem",
+    "public": ".",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
     ]
   }
 }

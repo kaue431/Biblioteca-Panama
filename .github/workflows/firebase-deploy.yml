@@ -1,4 +1,4 @@
-name: Deploy to Firebase
+name: Deploy to Firebase Hosting
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
@@ -15,23 +16,13 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '18'
+        node-version: '18'  # Use Node.js versão 18
 
     - name: Install Dependencies
-      run: npm install --verbose
-
-    - name: Verify Node.js and npm
-      run: |
-        node -v
-        npm -v
+      run: npm install
 
     - name: Build Project
-      run: |
-        echo "Build step started"
-        npm run build
-
-    - name: Check Firebase Token
-      run: echo $FIREBASE_TOKEN
+      run: npm run build
 
     - name: Deploy to Firebase
       env:

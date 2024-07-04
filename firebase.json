@@ -1,16 +1,13 @@
 {
-  "hosting": {
-    "public": "public", // diretório público onde estão os arquivos a serem hospedados
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
+  "name": "seu-projeto",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "seu-comando-de-build"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "firebase-tools": "^9.16.0"
   }
 }

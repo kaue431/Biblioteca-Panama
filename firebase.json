@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "public",
+    "public": "nome_do_seu_diretorio_de_hospedagem",
     "ignore": [
       "firebase.json",
       "**/.*",

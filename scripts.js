@@ -1,14 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicialização dos dados a partir do localStorage, se existirem, ou dados padrão
-    let livros = JSON.parse(localStorage.getItem('livros')) || [
-        { id: 1, titulo: 'Dom Casmurro', genero: 'Romance', quantidade: 3, disponivel: true },
-        { id: 2, titulo: 'Memórias Póstumas de Brás Cubas', genero: 'Romance', quantidade: 2, disponivel: true },
-        { id: 3, titulo: 'O Cortiço', genero: 'Romance', quantidade: 1, disponivel: false },
-        { id: 4, titulo: 'Vidas Secas', genero: 'Romance', quantidade: 4, disponivel: true },
-        { id: 5, titulo: 'Grande Sertão: Veredas', genero: 'Romance', quantidade: 2, disponivel: true }
-    ];
-
-    let alugueis = JSON.parse(localStorage.getItem('alugueis')) || [];
+    let livros = []; // Será populado com os dados do Firebase
+    let alugueis = []; // Será populado com os dados do Firebase
 
     const listaLivros = document.getElementById('lista-livros');
     const selectLivro = document.getElementById('livro');
@@ -19,6 +11,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const formDevolucao = document.getElementById('form-devolucao');
     const tabelaAlugueis = document.getElementById('tabela').getElementsByTagName('tbody')[0];
     const senhaCorreta = 'admin123'; // Senha de acesso restrito (simulação)
+
+    // Referência para o banco de dados do Firebase
+    const db = firebase.database();
+    const livrosRef = db.ref('livros');
+    const alugueisRef = db.ref('alugueis');
+
+    // Função para inicializar e sincronizar dados do Firebase
+    function inicializarFirebase() {
+        // Sincronizar livros
+        livrosRef.on('value', function(snapshot) {
+            livros = snapshot.val() || [];
+            exibirLivros();
+            exibirLivrosSelect();
+        });
+
+        // Sincronizar aluguéis
+        alugueisRef.on('value', function(snapshot) {
+            alugueis = snapshot.val() || [];
+            atualizarTabelaAlugueis();
+        });
+    }
+
+    // Inicialização do Firebase
+    inicializarFirebase();
 
     // Função para exibir os livros disponíveis na lista
     function exibirLivros() {
@@ -89,19 +105,12 @@ document.addEventListener('DOMContentLoaded', function() {
             status: 'Dentro do prazo'
         };
 
-        alugueis.push(aluguel);
+        // Adicionar aluguel ao Firebase
+        alugueisRef.push(aluguel);
 
-        // Limpar campos do formulário
-        formAluguel.reset();
-
-        // Atualizar interface
+        // Atualizar interface (localmente)
         exibirLivros();
         exibirLivrosSelect();
-        atualizarTabelaAlugueis();
-        
-        // Salvar no localStorage
-        localStorage.setItem('livros', JSON.stringify(livros));
-        localStorage.setItem('alugueis', JSON.stringify(alugueis));
     });
 
     // Evento de submissão do formulário de acesso restrito
@@ -139,19 +148,11 @@ document.addEventListener('DOMContentLoaded', function() {
             disponivel: true
         };
 
-        livros.push(novoLivro);
-        alert(`Livro "${novoLivro.titulo}" adicionado com sucesso!`);
+        // Adicionar livro ao Firebase
+        livrosRef.push(novoLivro);
 
         // Limpar campos do formulário
         formAdicionar.reset();
-
-        // Atualizar interface
-        exibirLivros();
-        exibirLivrosSelect();
-        atualizarTabelaAlugueis();
-
-        // Salvar no localStorage
-        localStorage.setItem('livros', JSON.stringify(livros));
     });
 
     formRemover.addEventListener('submit', function(event) {
@@ -161,21 +162,17 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Digite um ID válido do livro!');
             return;
         }
-        const index = livros.findIndex(livro => livro.id === livroId);
-        if (index === -1) {
+        const livroRemovido = livros.find(livro => livro.id === livroId);
+        if (!livroRemovido) {
             alert('Livro não encontrado!');
             return;
         }
-        const livroRemovido = livros.splice(index, 1)[0];
-        alert(`Livro "${livroRemovido.titulo}" removido com sucesso!`);
 
-        // Atualizar interface
-        exibirLivros();
-        exibirLivrosSelect();
-        atualizarTabelaAlugueis();
+        // Remover livro do Firebase
+        livrosRef.child(livroId).remove();
 
-        // Salvar no localStorage
-        localStorage.setItem('livros', JSON.stringify(livros));
+        // Limpar campos do formulário
+        formRemover.reset();
     });
 
     formDevolucao.addEventListener('submit', function(event) {
@@ -185,28 +182,25 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Digite um código de devolução válido!');
             return;
         }
-        const index = alugueis.findIndex(aluguel => aluguel.codigoDevolucao === codigoDevolucao);
-        if (index === -1) {
+        const aluguelDevolvido = alugueis.find(aluguel => aluguel.codigoDevolucao === codigoDevolucao);
+        if (!aluguelDevolvido) {
             alert('Código de devolução não encontrado!');
             return;
         }
-        const aluguelDevolvido = alugueis.splice(index, 1)[0];
 
-        // Atualizar a disponibilidade do livro devolvido
+        // Remover aluguel do Firebase
+        alugueisRef.child(aluguelDevolvido.codigoDevolucao).remove();
+
+        // Atualizar a disponibilidade do livro devolvido (localmente)
         const livroDevolvido = livros.find(livro => livro.titulo === aluguelDevolvido.livro);
         livroDevolvido.disponivel = true;
         livroDevolvido.quantidade += 1;
 
         alert(`Livro "${aluguelDevolvido.livro}" devolvido com sucesso por ${aluguelDevolvido.nome}!`);
 
-        // Atualizar interface
+        // Atualizar interface (localmente)
         exibirLivros();
         exibirLivrosSelect();
-        atualizarTabelaAlugueis();
-
-        // Salvar no localStorage
-        localStorage.setItem('livros', JSON.stringify(livros));
-        localStorage.setItem('alugueis', JSON.stringify(alugueis));
     });
 
     // Função para atualizar a tabela de aluguéis

@@ -1,13 +1,16 @@
 {
-  "name": "seu-projeto",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "seu-comando-de-build"
-  },
-  "dependencies": {
-    "express": "^4.17.1"
-  },
-  "devDependencies": {
-    "firebase-tools": "^9.16.0"
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
   }
 }

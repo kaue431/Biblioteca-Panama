@@ -1,27 +1,34 @@
-name: Firebase Deploy
-
+name: Deploy to Firebase
 on:
   push:
     branches:
       - main
-
 jobs:
-  deploy:
+  build_and_deploy:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
+    - name: Checkout Repository
       uses: actions/checkout@v2
-
-    - name: Install Firebase CLI
-      run: npm install -g firebase-tools
-
-    - name: Deploy to Firebase
-      uses: FirebaseExtended/action-hosting-deploy@v0
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
       with:
-        repoToken: ${{ secrets.GITHUB_TOKEN }}
-        firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        projectId: panama-biblioteca-4f6a2
-        expires: 7d
-        entryPoint: .
-        firebaseToolsVersion: latest
+        node-version: '14'
+    - name: Install Dependencies
+      run: npm install --verbose
+
+    - name: Verify Node.js and npm
+      run: |
+        node -v
+        npm -v
+    - name: Build Project
+      run: |
+        echo "Build step started"
+        npm run build
+    - name: Check Firebase Token
+      run: echo $FIREBASE_TOKEN
+    - name: Deploy to Firebase
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      run: |
+        npm install -g firebase-tools
+        firebase deploy --only hosting

@@ -1,4 +1,4 @@
-name: Deploy to Firebase
+name: Deploy to Firebase Hosting
 on:
   push:
     branches:
@@ -12,23 +12,18 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '14'
-    - name: Install Dependencies
-      run: npm install --verbose
+        node-version: '18'  # Use Node.js versão 18 ou superior
+        node-version: '18'
 
-    - name: Verify Node.js and npm
-      run: |
-        node -v
-        npm -v
+    - name: Install Dependencies
+      run: npm install
     - name: Build Project
-      run: |
-        echo "Build step started"
-        npm run build
-    - name: Check Firebase Token
-      run: echo $FIREBASE_TOKEN
+      run: npm run build
     - name: Deploy to Firebase
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        PROJECT_ID: ${{ secrets.PROJECT_ID }}
       run: |
         npm install -g firebase-tools
-        firebase deploy --only hosting
+        firebase use $PROJECT_ID
+        firebase deploy --only hosting --project $PROJECT_ID

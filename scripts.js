@@ -1,18 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicialização do Firebase
-    const firebaseConfig = {
-        apiKey: "sua-api-key",
-        authDomain: "seu-auth-domain",
-        projectId: "seu-project-id",
-        storageBucket: "seu-storage-bucket",
-        messagingSenderId: "seu-messaging-sender-id",
-        appId: "seu-app-id",
-        measurementId: "seu-measurement-id"
-    };
-    
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
     // Inicialização dos dados a partir do localStorage, se existirem, ou dados padrão
     let livros = JSON.parse(localStorage.getItem('livros')) || [
         { id: 1, titulo: 'Dom Casmurro', genero: 'Romance', quantidade: 3, disponivel: true },

@@ -113,3 +113,8 @@ footer {
 .dentro-do-prazo {
     background-color: #4CAF50; /* Verde */
 }
+
+.indisponivel {
+    color: red;
+    font-style: italic;
+}

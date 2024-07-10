@@ -1,39 +1,62 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Inicialização do Firebase
     const firebaseConfig = {
-        apiKey: "AIzaSyDFVFYGg0rg9P82kw3-PvSFahGJmJXr2bw",
-        authDomain: "panama-biblioteca.firebaseapp.com",
-        projectId: "panama-biblioteca",
-        storageBucket: "panama-biblioteca.appspot.com",
-        messagingSenderId: "886950292259",
-        appId: "1:886950292259:web:1a7c6ea618c3aa86bf7a96",
-        measurementId: "G-4C70YD1KER"
+        apiKey: "sua-api-key",
+        authDomain: "seu-auth-domain",
+        projectId: "seu-project-id",
+        storageBucket: "seu-storage-bucket",
+        messagingSenderId: "seu-messaging-sender-id",
+        appId: "seu-app-id",
+        measurementId: "seu-measurement-id"
     };
     
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // Inicialização dos dados a partir do localStorage, se existirem, ou dados padrão
+    let livros = JSON.parse(localStorage.getItem('livros')) || [
+        { id: 1, titulo: 'Dom Casmurro', genero: 'Romance', quantidade: 3, disponivel: true },
+        { id: 2, titulo: 'Memórias Póstumas de Brás Cubas', genero: 'Romance', quantidade: 2, disponivel: true },
+        { id: 3, titulo: 'O Cortiço', genero: 'Romance', quantidade: 1, disponivel: false },
+        { id: 4, titulo: 'Vidas Secas', genero: 'Romance', quantidade: 4, disponivel: true },
+        { id: 5, titulo: 'Grande Sertão: Veredas', genero: 'Romance', quantidade: 2, disponivel: true }
+    ];
+
+    let alugueis = JSON.parse(localStorage.getItem('alugueis')) || [];
+
+    const listaLivros = document.getElementById('lista-livros');
+    const selectLivro = document.getElementById('livro');
+    const adminPanel = document.getElementById('admin-panel');
+    const formAcesso = document.getElementById('form-acesso');
+    const formAdicionar = document.getElementById('form-adicionar');
+    const formRemover = document.getElementById('form-remover');
+    const formDevolucao = document.getElementById('form-devolucao');
+    const tabelaAlugueis = document.getElementById('tabela').getElementsByTagName('tbody')[0];
+    const senhaCorreta = 'admin123'; // Senha de acesso restrito (simulação)
+
     // Função para exibir os livros disponíveis na lista
     function exibirLivros() {
-        db.collection("livros").get().then((querySnapshot) => {
-            listaLivros.innerHTML = ''; // Limpa a lista antes de recriá-la
-            selectLivro.innerHTML = ''; // Limpa o select antes de recriá-lo
-            querySnapshot.forEach((doc) => {
-                const livro = doc.data();
-                const li = document.createElement('li');
-                li.textContent = `${livro.titulo} - Quantidade: ${livro.quantidade}`;
-                if (!livro.disponivel && livro.quantidade > 0) {
-                    li.classList.add('indisponivel');
-                }
-                listaLivros.appendChild(li);
-                
-                if (livro.quantidade > 0) {
-                    const option = document.createElement('option');
-                    option.value = doc.id;
-                    option.textContent = livro.titulo;
-                    selectLivro.appendChild(option);
-                }
-            });
+        listaLivros.innerHTML = ''; // Limpa a lista antes de recriá-la
+        livros.forEach(livro => {
+            const li = document.createElement('li');
+            li.textContent = `${livro.titulo} - Quantidade: ${livro.quantidade}`;
+            if (!livro.disponivel && livro.quantidade > 0) {
+                li.classList.add('indisponivel');
+            }
+            listaLivros.appendChild(li);
+        });
+    }
+
+    // Função para exibir os livros disponíveis no formulário de aluguel
+    function exibirLivrosSelect() {
+        selectLivro.innerHTML = ''; // Limpa o select antes de recriá-lo
+        livros.forEach(livro => {
+            if (livro.quantidade > 0) {
+                const option = document.createElement('option');
+                option.value = livro.id;
+                option.textContent = livro.titulo;
+                selectLivro.appendChild(option);
+            }
         });
     }
 
@@ -44,56 +67,57 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const nome = document.getElementById('nome').value;
         const sala = document.getElementById('sala').value;
-        const livroId = selectLivro.value;
+        const livroId = parseInt(selectLivro.value);
 
-        if (!nome || !sala || !livroId) {
+        if (!nome || !sala || isNaN(livroId)) {
             alert('Preencha todos os campos!');
             return;
         }
 
-        db.collection("livros").doc(livroId).get().then((doc) => {
-            if (doc.exists) {
-                const livro = doc.data();
-                if (livro.quantidade <= 0) {
-                    alert('Livro selecionado não está disponível para aluguel!');
-                    return;
-                }
+        const livroSelecionado = livros.find(livro => livro.id === livroId);
 
-                alert(`Livro "${livro.titulo}" alugado por ${nome}, da sala ${sala}!`);
+        if (!livroSelecionado || livroSelecionado.quantidade <= 0) {
+            alert('Livro selecionado não está disponível para aluguel!');
+            return;
+        }
 
-                // Atualização da disponibilidade do livro e quantidade
-                db.collection("livros").doc(livroId).update({
-                    quantidade: firebase.firestore.FieldValue.increment(-1),
-                    disponivel: livro.quantidade - 1 > 0
-                });
+        // Simulação do processo de aluguel
+        alert(`Livro "${livroSelecionado.titulo}" alugado por ${nome}, da sala ${sala}!`);
 
-                // Registrar o aluguel na Firestore
-                const dataAluguel = new Date();
-                const dataDevolucao = new Date();
-                dataDevolucao.setDate(dataDevolucao.getDate() + 7); // Devolução em 7 dias
+        // Atualização da disponibilidade do livro e quantidade
+        livroSelecionado.quantidade -= 1;
+        if (livroSelecionado.quantidade === 0) {
+            livroSelecionado.disponivel = false;
+        }
 
-                const aluguel = {
-                    livro: livro.titulo,
-                    nome: nome,
-                    sala: sala,
-                    dataAluguel: dataAluguel.toLocaleDateString(),
-                    dataDevolucao: dataDevolucao.toLocaleDateString(),
-                    codigoDevolucao: Math.floor(1000 + Math.random() * 9000), // Gerar código de devolução aleatório
-                    status: 'Dentro do prazo'
-                };
+        // Registrar o aluguel na lista de aluguéis
+        const dataAluguel = new Date();
+        const dataDevolucao = new Date();
+        dataDevolucao.setDate(dataDevolucao.getDate() + 7); // Devolução em 7 dias
 
-                db.collection("alugueis").add(aluguel);
+        const aluguel = {
+            livro: livroSelecionado.titulo,
+            nome: nome,
+            sala: sala,
+            dataAluguel: dataAluguel.toLocaleDateString(),
+            dataDevolucao: dataDevolucao.toLocaleDateString(),
+            codigoDevolucao: Math.floor(1000 + Math.random() * 9000), // Gerar código de devolução aleatório
+            status: 'Dentro do prazo'
+        };
 
-                // Limpar campos do formulário
-                formAluguel.reset();
+        alugueis.push(aluguel);
 
-                // Atualizar interface
-                exibirLivros();
-                atualizarTabelaAlugueis();
-            } else {
-                alert('Livro não encontrado!');
-            }
-        });
+        // Limpar campos do formulário
+        formAluguel.reset();
+
+        // Atualizar interface
+        exibirLivros();
+        exibirLivrosSelect();
+        atualizarTabelaAlugueis();
+        
+        // Salvar no localStorage
+        localStorage.setItem('livros', JSON.stringify(livros));
+        localStorage.setItem('alugueis', JSON.stringify(alugueis));
     });
 
     // Evento de submissão do formulário de acesso restrito
@@ -122,105 +146,107 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Adicionar um novo livro no Firestore
+        // Simulação de adicionar um novo livro
         const novoLivro = {
+            id: livros.length + 1,
             titulo: tituloLivro,
             genero: generoLivro,
             quantidade: quantidadeLivro,
             disponivel: quantidadeLivro > 0 // Disponível se a quantidade for maior que 0
         };
 
-        db.collection("livros").add(novoLivro).then(() => {
-            alert(`Livro "${novoLivro.titulo}" adicionado com sucesso!`);
+        livros.push(novoLivro);
+        alert(`Livro "${novoLivro.titulo}" adicionado com sucesso!`);
 
-            // Limpar campos do formulário
-            formAdicionar.reset();
+        // Limpar campos do formulário
+        formAdicionar.reset();
 
-            // Atualizar interface
-            exibirLivros();
-        });
+        // Atualizar interface
+        exibirLivros();
+        exibirLivrosSelect();
+        atualizarTabelaAlugueis();
+
+        // Salvar no localStorage
+        localStorage.setItem('livros', JSON.stringify(livros));
     });
 
     formRemover.addEventListener('submit', function(event) {
         event.preventDefault();
-        const livroId = document.getElementById('livroId').value;
-
-        if (!livroId) {
+        const livroId = parseInt(document.getElementById('livroId').value);
+        if (isNaN(livroId)) {
             alert('Digite um ID válido do livro!');
             return;
         }
+        const index = livros.findIndex(livro => livro.id === livroId);
+        if (index === -1) {
+            alert('Livro não encontrado!');
+            return;
+        }
+        const livroRemovido = livros.splice(index, 1)[0];
+        alert(`Livro "${livroRemovido.titulo}" removido com sucesso!`);
 
-        db.collection("livros").doc(livroId).delete().then(() => {
-            alert('Livro removido com sucesso!');
+        // Atualizar interface
+        exibirLivros();
+        exibirLivrosSelect();
+        atualizarTabelaAlugueis();
 
-            // Atualizar interface
-            exibirLivros();
-        }).catch((error) => {
-            alert('Erro ao remover livro: ' + error.message);
-        });
+        // Salvar no localStorage
+        localStorage.setItem('livros', JSON.stringify(livros));
     });
 
     formDevolucao.addEventListener('submit', function(event) {
         event.preventDefault();
         const codigoDevolucao = parseInt(document.getElementById('codigoDevolucao').value);
-
         if (isNaN(codigoDevolucao)) {
             alert('Digite um código de devolução válido!');
             return;
         }
+        const index = alugueis.findIndex(aluguel => aluguel.codigoDevolucao === codigoDevolucao);
+        if (index === -1) {
+            alert('Código de devolução não encontrado!');
+            return;
+        }
+        const aluguelDevolvido = alugueis.splice(index, 1)[0];
 
-        db.collection("alugueis").where("codigoDevolucao", "==", codigoDevolucao).get().then((querySnapshot) => {
-            if (!querySnapshot.empty) {
-                const doc = querySnapshot.docs[0];
-                const aluguel = doc.data();
+        // Atualizar a disponibilidade do livro devolvido
+        const livroDevolvido = livros.find(livro => livro.titulo === aluguelDevolvido.livro);
+        livroDevolvido.quantidade += 1;
+        if (livroDevolvido.quantidade > 0) {
+            livroDevolvido.disponivel = true;
+        }
 
-                db.collection("alugueis").doc(doc.id).delete();
+        alert(`Livro "${aluguelDevolvido.livro}" devolvido com sucesso por ${aluguelDevolvido.nome}!`);
 
-                db.collection("livros").where("titulo", "==", aluguel.livro).get().then((livrosSnapshot) => {
-                    if (!livrosSnapshot.empty) {
-                        const livroDoc = livrosSnapshot.docs[0];
-                        const livro = livroDoc.data();
+        // Atualizar interface
+        exibirLivros();
+        exibirLivrosSelect();
+        atualizarTabelaAlugueis();
 
-                        db.collection("livros").doc(livroDoc.id).update({
-                            quantidade: firebase.firestore.FieldValue.increment(1),
-                            disponivel: true
-                        });
-
-                        alert(`Livro "${aluguel.livro}" devolvido com sucesso por ${aluguel.nome}!`);
-
-                        // Atualizar interface
-                        exibirLivros();
-                        atualizarTabelaAlugueis();
-                    }
-                });
-            } else {
-                alert('Código de devolução não encontrado!');
-            }
-        });
+        // Salvar no localStorage
+        localStorage.setItem('livros', JSON.stringify(livros));
+        localStorage.setItem('alugueis', JSON.stringify(alugueis));
     });
 
     // Função para atualizar a tabela de aluguéis
     function atualizarTabelaAlugueis() {
-        db.collection("alugueis").get().then((querySnapshot) => {
-            tabelaAlugueis.innerHTML = ''; // Limpa a tabela antes de recriá-la
-            querySnapshot.forEach((doc) => {
-                const aluguel = doc.data();
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${aluguel.livro}</td>
-                    <td>${aluguel.nome}</td>
-                    <td>${aluguel.sala}</td>
-                    <td>${aluguel.dataAluguel}</td>
-                    <td>${aluguel.dataDevolucao}</td>
-                    <td>${aluguel.codigoDevolucao}</td>
-                    <td>${aluguel.status}</td>
-                `;
-                tabelaAlugueis.appendChild(tr);
-            });
+        tabelaAlugueis.innerHTML = ''; // Limpa a tabela antes de recriá-la
+        alugueis.forEach(aluguel => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${aluguel.livro}</td>
+                <td>${aluguel.nome}</td>
+                <td>${aluguel.sala}</td>
+                <td>${aluguel.dataAluguel}</td>
+                <td>${aluguel.dataDevolucao}</td>
+                <td>${aluguel.codigoDevolucao}</td>
+                <td>${aluguel.status}</td>
+            `;
+            tabelaAlugueis.appendChild(tr);
         });
     }
 
     // Exibir inicialmente os livros e a tabela de aluguéis
     exibirLivros();
+    exibirLivrosSelect();
     atualizarTabelaAlugueis();
 });

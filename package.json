@@ -10,3 +10,19 @@
     "firebase": "^10.0.0"
   }
 }
+
+
+{
+  "name": "biblioteca-panama",
+  "version": "1.0.0",
+  "description": "Projeto de deploy no firebase",
+  "scripts": {
+    "build": "echo 'Add your build commands here'"
+  },
+  "dependencies": {
+    "firebase": "^10.0.0"
+  },
+  "devDependencies": {
+    // suas dependências de desenvolvimento aqui
+  }
+}

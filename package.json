@@ -1,19 +1,12 @@
 {
   "name": "biblioteca-panama",
   "version": "1.0.0",
-  "description": "Projeto de deploy no Firebase",
-  "main": "index.js",
+  "description": "Projeto de deploy no firebase",
   "scripts": {
     "start": "node index.js",
-    "build": "echo 'Build process...' && exit 0",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "deploy": "firebase deploy --only hosting"
   },
-  "author": "Seu Nome",
-  "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1"
-  },
-  "devDependencies": {
-    "firebase-tools": "^9.16.0"
+    "firebase": "^10.0.0"
   }
 }

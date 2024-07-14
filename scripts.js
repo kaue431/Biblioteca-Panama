@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    let livros = []; // Será populado com os dados do Firebase
-    let alugueis = []; // Será populado com os dados do Firebase
     // Inicialização dos dados a partir do localStorage, se existirem, ou dados padrão
     let livros = JSON.parse(localStorage.getItem('livros')) || [
         { id: 1, titulo: 'Dom Casmurro', genero: 'Romance', quantidade: 3, disponivel: true },

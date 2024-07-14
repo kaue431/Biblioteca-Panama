@@ -1,14 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicialização dos dados a partir do localStorage, se existirem, ou dados padrão
-    let livros = JSON.parse(localStorage.getItem('livros')) || [
-        { id: 1, titulo: 'Dom Casmurro', genero: 'Romance', quantidade: 3, disponivel: true },
-        { id: 2, titulo: 'Memórias Póstumas de Brás Cubas', genero: 'Romance', quantidade: 2, disponivel: true },
-        { id: 3, titulo: 'O Cortiço', genero: 'Romance', quantidade: 1, disponivel: false },
-        { id: 4, titulo: 'Vidas Secas', genero: 'Romance', quantidade: 4, disponivel: true },
-        { id: 5, titulo: 'Grande Sertão: Veredas', genero: 'Romance', quantidade: 2, disponivel: true }
-    ];
-
-    let alugueis = JSON.parse(localStorage.getItem('alugueis')) || [];
+    let livros = []; // Será populado com os dados do Firebase
+    let alugueis = []; // Será populado com os dados do Firebase
 
     const listaLivros = document.getElementById('lista-livros');
     const selectLivro = document.getElementById('livro');
@@ -20,219 +12,141 @@ document.addEventListener('DOMContentLoaded', function() {
     const tabelaAlugueis = document.getElementById('tabela').getElementsByTagName('tbody')[0];
     const senhaCorreta = 'admin123'; // Senha de acesso restrito (simulação)
 
+    // Referência para o banco de dados do Firebase
+    const db = firebase.database();
+    const livrosRef = db.ref('livros');
+    const alugueisRef = db.ref('alugueis');
+
+    // Função para inicializar e sincronizar dados do Firebase
+    function inicializarFirebase() {
+        // Sincronizar livros
+        livrosRef.on('value', function(snapshot) {
+            livros = snapshot.val() || [];
+            exibirLivros();
+            exibirLivrosSelect();
+        });
+
+        // Sincronizar aluguéis
+        alugueisRef.on('value', function(snapshot) {
+            alugueis = snapshot.val() || [];
+            atualizarTabelaAlugueis();
+        });
+    }
+
+    // Inicialização do Firebase
+    inicializarFirebase();
+
     // Função para exibir os livros disponíveis na lista
     function exibirLivros() {
-        listaLivros.innerHTML = ''; // Limpa a lista antes de recriá-la
-        livros.forEach(livro => {
+        listaLivros.innerHTML = '';
+        for (let id in livros) {
+            const livro = livros[id];
             const li = document.createElement('li');
-            li.textContent = `${livro.titulo} - Quantidade: ${livro.quantidade}`;
-            if (!livro.disponivel && livro.quantidade > 0) {
-                li.classList.add('indisponivel');
-            }
+            li.textContent = `${livro.titulo} - ${livro.genero} - Quantidade: ${livro.quantidade}`;
             listaLivros.appendChild(li);
-        });
+        }
     }
 
-    // Função para exibir os livros disponíveis no formulário de aluguel
+    // Função para preencher o select com os livros disponíveis
     function exibirLivrosSelect() {
-        selectLivro.innerHTML = ''; // Limpa o select antes de recriá-lo
-        livros.forEach(livro => {
-            if (livro.quantidade > 0) {
-                const option = document.createElement('option');
-                option.value = livro.id;
-                option.textContent = livro.titulo;
-                selectLivro.appendChild(option);
-            }
-        });
+        selectLivro.innerHTML = '';
+        for (let id in livros) {
+            const livro = livros[id];
+            const option = document.createElement('option');
+            option.value = id;
+            option.textContent = livro.titulo;
+            selectLivro.appendChild(option);
+        }
     }
 
-    // Evento de submissão do formulário de aluguel
-    const formAluguel = document.getElementById('form-aluguel');
-    formAluguel.addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        const nome = document.getElementById('nome').value;
-        const sala = document.getElementById('sala').value;
-        const livroId = parseInt(selectLivro.value);
-
-        if (!nome || !sala || isNaN(livroId)) {
-            alert('Preencha todos os campos!');
-            return;
-        }
-
-        const livroSelecionado = livros.find(livro => livro.id === livroId);
-
-        if (!livroSelecionado || livroSelecionado.quantidade <= 0) {
-            alert('Livro selecionado não está disponível para aluguel!');
-            return;
-        }
-
-        // Simulação do processo de aluguel
-        alert(`Livro "${livroSelecionado.titulo}" alugado por ${nome}, da sala ${sala}!`);
-
-        // Atualização da disponibilidade do livro e quantidade
-        livroSelecionado.quantidade -= 1;
-        if (livroSelecionado.quantidade === 0) {
-            livroSelecionado.disponivel = false;
-        }
-
-        // Registrar o aluguel na lista de aluguéis
-        const dataAluguel = new Date();
-        const dataDevolucao = new Date();
-        dataDevolucao.setDate(dataDevolucao.getDate() + 7); // Devolução em 7 dias
-
-        const aluguel = {
-            livro: livroSelecionado.titulo,
-            nome: nome,
-            sala: sala,
-            dataAluguel: dataAluguel.toLocaleDateString(),
-            dataDevolucao: dataDevolucao.toLocaleDateString(),
-            codigoDevolucao: Math.floor(1000 + Math.random() * 9000), // Gerar código de devolução aleatório
-            status: 'Dentro do prazo'
-        };
-
-        alugueis.push(aluguel);
-
-        // Limpar campos do formulário
-        formAluguel.reset();
-
-        // Atualizar interface
-        exibirLivros();
-        exibirLivrosSelect();
-        atualizarTabelaAlugueis();
-        
-        // Salvar no localStorage
-        localStorage.setItem('livros', JSON.stringify(livros));
-        localStorage.setItem('alugueis', JSON.stringify(alugueis));
-    });
-
-    // Evento de submissão do formulário de acesso restrito
-    formAcesso.addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        const senha = document.getElementById('senha').value;
-
-        if (senha === senhaCorreta) {
-            adminPanel.style.display = 'block';
-            formAcesso.reset();
-        } else {
-            alert('Senha incorreta! Tente novamente.');
-        }
-    });
-
-    // Eventos de adicionar e remover livros (simulados)
+    // Função para adicionar livro ao Firebase
     formAdicionar.addEventListener('submit', function(event) {
         event.preventDefault();
-        const tituloLivro = document.getElementById('tituloLivro').value;
-        const generoLivro = document.getElementById('generoLivro').value;
-        const quantidadeLivro = parseInt(document.getElementById('quantidadeLivro').value);
+        const titulo = document.getElementById('tituloLivro').value;
+        const genero = document.getElementById('generoLivro').value;
+        const quantidade = parseInt(document.getElementById('quantidadeLivro').value, 10);
 
-        if (!tituloLivro || !generoLivro || isNaN(quantidadeLivro) || quantidadeLivro <= 0) {
-            alert('Preencha todos os campos corretamente!');
-            return;
-        }
+        const novoLivro = { titulo, genero, quantidade };
+        livrosRef.push(novoLivro);
 
-        // Simulação de adicionar um novo livro
-        const novoLivro = {
-            id: livros.length + 1,
-            titulo: tituloLivro,
-            genero: generoLivro,
-            quantidade: quantidadeLivro,
-            disponivel: quantidadeLivro > 0 // Disponível se a quantidade for maior que 0
-        };
-
-        livros.push(novoLivro);
-        alert(`Livro "${novoLivro.titulo}" adicionado com sucesso!`);
-
-        // Limpar campos do formulário
         formAdicionar.reset();
-
-        // Atualizar interface
-        exibirLivros();
-        exibirLivrosSelect();
-        atualizarTabelaAlugueis();
-
-        // Salvar no localStorage
-        localStorage.setItem('livros', JSON.stringify(livros));
     });
 
+    // Função para remover livro do Firebase
     formRemover.addEventListener('submit', function(event) {
         event.preventDefault();
-        const livroId = parseInt(document.getElementById('livroId').value);
-        if (isNaN(livroId)) {
-            alert('Digite um ID válido do livro!');
-            return;
-        }
-        const index = livros.findIndex(livro => livro.id === livroId);
-        if (index === -1) {
-            alert('Livro não encontrado!');
-            return;
-        }
-        const livroRemovido = livros.splice(index, 1)[0];
-        alert(`Livro "${livroRemovido.titulo}" removido com sucesso!`);
-
-        // Atualizar interface
-        exibirLivros();
-        exibirLivrosSelect();
-        atualizarTabelaAlugueis();
-
-        // Salvar no localStorage
-        localStorage.setItem('livros', JSON.stringify(livros));
+        const id = document.getElementById('livroId').value;
+        livrosRef.child(id).remove();
+        formRemover.reset();
     });
 
+    // Função para devolver livro ao Firebase
     formDevolucao.addEventListener('submit', function(event) {
         event.preventDefault();
-        const codigoDevolucao = parseInt(document.getElementById('codigoDevolucao').value);
-        if (isNaN(codigoDevolucao)) {
-            alert('Digite um código de devolução válido!');
-            return;
+        const codigoDevolucao = document.getElementById('codigoDevolucao').value;
+        const aluguel = alugueis.find(aluguel => aluguel.codigoDevolucao == codigoDevolucao);
+
+        if (aluguel) {
+            const livro = livros[aluguel.livroId];
+            livro.quantidade++;
+            livrosRef.child(aluguel.livroId).update(livro);
+
+            aluguel.status = 'Devolvido';
+            alugueisRef.child(aluguel.id).update(aluguel);
+            formDevolucao.reset();
         }
-        const index = alugueis.findIndex(aluguel => aluguel.codigoDevolucao === codigoDevolucao);
-        if (index === -1) {
-            alert('Código de devolução não encontrado!');
-            return;
+    });
+
+    // Função para alugar livro
+    document.getElementById('form-aluguel').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const nome = document.getElementById('nome').value;
+        const sala = document.getElementById('sala').value;
+        const livroId = document.getElementById('livro').value;
+        const livro = livros[livroId];
+        const dataAluguel = new Date().toISOString().split('T')[0]; // Data atual
+        const codigoDevolucao = Date.now(); // Código de devolução único
+        const dataDevolucao = ''; // Pode ser preenchido no momento da devolução
+        const status = 'Alugado';
+
+        if (livro.quantidade > 0) {
+            livro.quantidade--;
+            livrosRef.child(livroId).update(livro);
+
+            const novoAluguel = { livroId, nome, sala, dataAluguel, dataDevolucao, codigoDevolucao, status };
+            alugueisRef.push(novoAluguel);
+
+            document.getElementById('form-aluguel').reset();
         }
-        const aluguelDevolvido = alugueis.splice(index, 1)[0];
-
-        // Atualizar a disponibilidade do livro devolvido
-        const livroDevolvido = livros.find(livro => livro.titulo === aluguelDevolvido.livro);
-        livroDevolvido.quantidade += 1;
-        if (livroDevolvido.quantidade > 0) {
-            livroDevolvido.disponivel = true;
-        }
-
-        alert(`Livro "${aluguelDevolvido.livro}" devolvido com sucesso por ${aluguelDevolvido.nome}!`);
-
-        // Atualizar interface
-        exibirLivros();
-        exibirLivrosSelect();
-        atualizarTabelaAlugueis();
-
-        // Salvar no localStorage
-        localStorage.setItem('livros', JSON.stringify(livros));
-        localStorage.setItem('alugueis', JSON.stringify(alugueis));
     });
 
     // Função para atualizar a tabela de aluguéis
     function atualizarTabelaAlugueis() {
-        tabelaAlugueis.innerHTML = ''; // Limpa a tabela antes de recriá-la
-        alugueis.forEach(aluguel => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${aluguel.livro}</td>
-                <td>${aluguel.nome}</td>
-                <td>${aluguel.sala}</td>
-                <td>${aluguel.dataAluguel}</td>
-                <td>${aluguel.dataDevolucao}</td>
-                <td>${aluguel.codigoDevolucao}</td>
-                <td>${aluguel.status}</td>
-            `;
-            tabelaAlugueis.appendChild(tr);
-        });
+        tabelaAlugueis.innerHTML = '';
+        for (let id in alugueis) {
+            const aluguel = alugueis[id];
+            const livro = livros[aluguel.livroId];
+            const row = tabelaAlugueis.insertRow();
+            row.insertCell(0).textContent = livro.titulo;
+            row.insertCell(1).textContent = aluguel.nome;
+            row.insertCell(2).textContent = aluguel.sala;
+            row.insertCell(3).textContent = aluguel.dataAluguel;
+            row.insertCell(4).textContent = aluguel.dataDevolucao;
+            row.insertCell(5).textContent = aluguel.codigoDevolucao;
+            row.insertCell(6).textContent = aluguel.status;
+            row.classList.add(aluguel.status === 'Devolvido' ? 'dentro-do-prazo' : 'atrasado');
+        }
     }
 
-    // Exibir inicialmente os livros e a tabela de aluguéis
-    exibirLivros();
-    exibirLivrosSelect();
-    atualizarTabelaAlugueis();
+    // Função de controle de acesso administrativo
+    formAcesso.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const senha = document.getElementById('senha').value;
+        if (senha === senhaCorreta) {
+            adminPanel.style.display = 'block';
+            formAcesso.style.display = 'none';
+        } else {
+            alert('Senha incorreta!');
+        }
+    });
 });

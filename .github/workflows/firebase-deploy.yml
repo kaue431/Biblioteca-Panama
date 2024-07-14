@@ -21,8 +21,8 @@ jobs:
       with:
         repoToken: ${{ secrets.GITHUB_TOKEN }}
         firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        projectId: panama-biblioteca-7fb3a  # Atualize para o novo ID do projeto
+        projectId: panama-biblioteca-7fb3a
         expires: 7d
         entryPoint: .
         firebaseToolsVersion: latest
-        channelId: live  # Alterado para 'live' para um deploy de produção
+        channelId: live  # Altere para 'live' para deploy em produção

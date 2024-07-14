@@ -11,9 +11,9 @@
   "author": "Seu Nome",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1"  // Inclua as dependências que seu projeto necessita
+    "express": "^4.17.1"
   },
   "devDependencies": {
-    "firebase-tools": "^9.16.0" // Inclua aqui dependências de desenvolvimento, se necessário
+    "firebase-tools": "^9.16.0"
   }
 }

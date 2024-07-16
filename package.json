@@ -8,12 +8,12 @@
     "build": "echo 'Build process...' && exit 0",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Seu Nome",
+  "author": "JK",
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1"
   },
   "devDependencies": {
-    "firebase-tools": "^13.13.2"
+    "firebase-tools": "^9.16.0"
   }
 }

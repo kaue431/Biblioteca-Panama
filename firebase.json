@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": ".",
+    "public": ".", // Use "." para a raiz do repositório ou substitua pelo nome do diretório correto
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {

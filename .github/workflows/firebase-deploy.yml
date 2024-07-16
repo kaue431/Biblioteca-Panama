@@ -23,5 +23,5 @@ jobs:
         firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         projectId: panama-biblioteca-7fb3a
         expires: 7d
-        entryPoint: public
+        entryPoint: .
         firebaseToolsVersion: latest

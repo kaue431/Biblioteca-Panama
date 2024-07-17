@@ -23,5 +23,5 @@ jobs:
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
       run: |
-        firebase use --add ${{ secrets.FIREBASE_PROJECT_ID }}
+        firebase use ${{ secrets.FIREBASE_PROJECT_ID }}
         firebase deploy --only hosting --token $FIREBASE_TOKEN

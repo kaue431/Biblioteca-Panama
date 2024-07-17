@@ -1,100 +1,87 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const listaLivros = document.getElementById('lista-livros');
-    const selectLivro = document.getElementById('livro');
-    const tabelaAlugueis = document.getElementById('tabela').getElementsByTagName('tbody')[0];
+// Função para exibir os livros disponíveis na lista
+function exibirLivros() {
+  const listaLivros = document.getElementById('lista-livros');
+  listaLivros.innerHTML = ''; // Limpa a lista antes de recriá-la
 
-    // Função para carregar livros disponíveis do Firestore
-    async function carregarLivros() {
-        const querySnapshot = await db.collection('livrosDisponiveis').get();
-        let livros = [];
-        querySnapshot.forEach((doc) => {
-            livros.push({ id: doc.id, ...doc.data() });
-        });
-        return livros;
-    }
+  // Consultar os documentos da coleção 'livrosDisponiveis'
+  getDocs(collection(db, 'livrosDisponiveis')).then(querySnapshot => {
+    querySnapshot.forEach(doc => {
+      const livro = doc.data();
+      const li = document.createElement('li');
+      li.textContent = `${livro.titulo} - Quantidade: ${livro.quantidade}`;
+      if (!livro.disponivel && livro.quantidade > 0) {
+        li.classList.add('indisponivel');
+      }
+      listaLivros.appendChild(li);
+    });
+  }).catch(error => {
+    console.error('Erro ao obter livros disponíveis: ', error);
+  });
+}
 
-    // Função para exibir os livros disponíveis
-    async function exibirLivros() {
-        const livros = await carregarLivros();
-        listaLivros.innerHTML = '';
-        livros.forEach(livro => {
-            const li = document.createElement('li');
-            li.textContent = `${livro.titulo} - Quantidade: ${livro.quantidade}`;
-            listaLivros.appendChild(li);
+// Evento de submissão do formulário de aluguel
+const formAluguel = document.getElementById('form-aluguel');
+formAluguel.addEventListener('submit', function(event) {
+  event.preventDefault();
 
-            const option = document.createElement('option');
-            option.value = livro.id;
-            option.textContent = livro.titulo;
-            selectLivro.appendChild(option);
-        });
-    }
+  const nome = document.getElementById('nome').value;
+  const sala = document.getElementById('sala').value;
+  const livroId = parseInt(document.getElementById('livro').value);
 
-    // Função para registrar aluguel no Firestore
-    async function registrarAluguel(aluguel) {
-        await db.collection('livrosAlugados').add(aluguel);
-    }
+  if (!nome || !sala || isNaN(livroId)) {
+    alert('Preencha todos os campos!');
+    return;
+  }
 
-    // Evento de submissão do formulário de aluguel
-    document.getElementById('form-aluguel').addEventListener('submit', async function(event) {
-        event.preventDefault();
+  // Consultar o documento do livro selecionado
+  const livroRef = doc(db, 'livrosDisponiveis', livroId.toString());
+  getDoc(livroRef).then(docSnapshot => {
+    if (docSnapshot.exists()) {
+      const livro = docSnapshot.data();
 
-        const nome = document.getElementById('nome').value;
-        const sala = document.getElementById('sala').value;
-        const livroId = selectLivro.value;
-
-        const livroDoc = await db.collection('livrosDisponiveis').doc(livroId).get();
-        if (!livroDoc.exists || livroDoc.data().quantidade <= 0) {
-            alert('Livro selecionado não está disponível para aluguel!');
-            return;
-        }
-
-        alert(`Livro "${livroDoc.data().titulo}" alugado por ${nome}, da sala ${sala}!`);
-
-        await db.collection('livrosDisponiveis').doc(livroId).update({
-            quantidade: firebase.firestore.FieldValue.increment(-1)
-        });
-
+      if (livro.quantidade > 0) {
+        // Realizar o aluguel do livro (atualizar quantidade e adicionar à coleção 'livrosAlugados')
         const dataAluguel = new Date();
         const dataDevolucao = new Date();
-        dataDevolucao.setDate(dataDevolucao.getDate() + 7);
+        dataDevolucao.setDate(dataDevolucao.getDate() + 7); // Devolução em 7 dias
 
         const aluguel = {
-            livro: livroDoc.data().titulo,
-            nome: nome,
-            sala: sala,
-            dataAluguel: dataAluguel.toLocaleDateString(),
-            dataDevolucao: dataDevolucao.toLocaleDateString(),
-            codigoDevolucao: Math.floor(1000 + Math.random() * 9000),
-            status: 'Dentro do prazo'
+          livro: livro.titulo,
+          nome: nome,
+          sala: sala,
+          dataAluguel: dataAluguel.toLocaleDateString(),
+          dataDevolucao: dataDevolucao.toLocaleDateString(),
+          codigoDevolucao: Math.floor(1000 + Math.random() * 9000), // Gerar código de devolução aleatório
+          status: 'Dentro do prazo'
         };
 
-        await registrarAluguel(aluguel);
+        // Atualizar quantidade de livros disponíveis
+        const updatedLivro = {
+          ...livro,
+          quantidade: livro.quantidade - 1,
+          disponivel: livro.quantidade - 1 > 0
+        };
 
-        // Atualizar interface
-        exibirLivros();
-    });
+        // Atualizar livro na coleção 'livrosDisponiveis'
+        updateDoc(livroRef, updatedLivro);
 
-    // Função para carregar alugueis do Firestore
-    async function carregarAlugueis() {
-        const querySnapshot = await db.collection('livrosAlugados').get();
-        tabelaAlugueis.innerHTML = '';
-        querySnapshot.forEach((doc) => {
-            const aluguel = doc.data();
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${aluguel.livro}</td>
-                <td>${aluguel.nome}</td>
-                <td>${aluguel.sala}</td>
-                <td>${aluguel.dataAluguel}</td>
-                <td>${aluguel.dataDevolucao}</td>
-                <td>${aluguel.codigoDevolucao}</td>
-                <td>${aluguel.status}</td>
-            `;
-            tabelaAlugueis.appendChild(tr);
+        // Adicionar aluguel à coleção 'livrosAlugados'
+        addDoc(collection(db, 'livrosAlugados'), aluguel).then(() => {
+          alert(`Livro "${livro.titulo}" alugado por ${nome}, da sala ${sala}!`);
+          exibirLivros(); // Atualizar interface
+        }).catch(error => {
+          console.error('Erro ao adicionar aluguel: ', error);
         });
+      } else {
+        alert('Livro selecionado não está disponível para aluguel!');
+      }
+    } else {
+      alert('Livro selecionado não encontrado!');
     }
+  }).catch(error => {
+    console.error('Erro ao consultar livro: ', error);
+  });
 
-    // Carregar livros e alugueis na inicialização
-    exibirLivros();
-    carregarAlugueis();
+  // Limpar campos do formulário
+  formAluguel.reset();
 });

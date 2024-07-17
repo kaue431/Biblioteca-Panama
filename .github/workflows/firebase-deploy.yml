@@ -19,6 +19,9 @@ jobs:
     - name: Debug - List root directory
       run: ls -la
 
+    - name: Debug - List public directory
+      run: ls -la public
+
     - name: Deploy to Firebase
       uses: FirebaseExtended/action-hosting-deploy@v0
       with:

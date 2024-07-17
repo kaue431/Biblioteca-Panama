@@ -19,14 +19,7 @@ jobs:
     - name: Debug - List root directory
       run: ls -la
 
-    - name: Set Firebase project
-      env:
-        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-      run: |
-        firebase use ${{ secrets.FIREBASE_PROJECT_ID }} --token $FIREBASE_TOKEN
-
     - name: Deploy to Firebase
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-      run: |
-        firebase deploy --only hosting --token $FIREBASE_TOKEN
+      run: firebase deploy --only hosting --project panama-biblioteca-7fb3a --token $FIREBASE_TOKEN

@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let livros = JSON.parse(localStorage.getItem('livros')) || [
         { id: 1, titulo: 'Dom Casmurro', genero: 'Romance', quantidade: 3, disponivel: true },
         { id: 2, titulo: 'Memórias Póstumas de Brás Cubas', genero: 'Romance', quantidade: 2, disponivel: true },
-        { id: 3, titulo: 'O Cortiço', genero: 'Romance', quantidade: 1, disponivel: true },
+        { id: 3, titulo: 'O Cortiço', genero: 'Romance', quantidade: 1, disponivel: false },
         { id: 4, titulo: 'Vidas Secas', genero: 'Romance', quantidade: 4, disponivel: true },
         { id: 5, titulo: 'Grande Sertão: Veredas', genero: 'Romance', quantidade: 2, disponivel: true }
     ];
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
         listaLivros.innerHTML = ''; // Limpa a lista antes de recriá-la
         livros.forEach(livro => {
             const li = document.createElement('li');
-            li.textContent = ${livro.titulo} - Quantidade: ${livro.quantidade};
+            li.textContent = `${livro.titulo} - Quantidade: ${livro.quantidade}`;
             if (!livro.disponivel && livro.quantidade > 0) {
                 li.classList.add('indisponivel');
             }
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Simulação do processo de aluguel
-        alert(Livro "${livroSelecionado.titulo}" alugado por ${nome}, da sala ${sala}!);
+        alert(`Livro "${livroSelecionado.titulo}" alugado por ${nome}, da sala ${sala}!`);
 
         // Atualização da disponibilidade do livro e quantidade
         livroSelecionado.quantidade -= 1;
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         livros.push(novoLivro);
-        alert(Livro "${novoLivro.titulo}" adicionado com sucesso!);
+        alert(`Livro "${novoLivro.titulo}" adicionado com sucesso!`);
 
         // Limpar campos do formulário
         formAdicionar.reset();
@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         const livroRemovido = livros.splice(index, 1)[0];
-        alert(Livro "${livroRemovido.titulo}" removido com sucesso!);
+        alert(`Livro "${livroRemovido.titulo}" removido com sucesso!`);
 
         // Atualizar interface
         exibirLivros();
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
             livroDevolvido.disponivel = true;
         }
 
-        alert(Livro "${aluguelDevolvido.livro}" devolvido com sucesso por ${aluguelDevolvido.nome}!);
+        alert(`Livro "${aluguelDevolvido.livro}" devolvido com sucesso por ${aluguelDevolvido.nome}!`);
 
         // Atualizar interface
         exibirLivros();
@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
         tabelaAlugueis.innerHTML = ''; // Limpa a tabela antes de recriá-la
         alugueis.forEach(aluguel => {
             const tr = document.createElement('tr');
-            tr.innerHTML = 
+            tr.innerHTML = `
                 <td>${aluguel.livro}</td>
                 <td>${aluguel.nome}</td>
                 <td>${aluguel.sala}</td>
@@ -226,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${aluguel.dataDevolucao}</td>
                 <td>${aluguel.codigoDevolucao}</td>
                 <td>${aluguel.status}</td>
-            ;
+            `;
             tabelaAlugueis.appendChild(tr);
         });
     }

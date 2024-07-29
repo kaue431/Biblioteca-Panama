@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const formRemover = document.getElementById('form-remover');
     const formDevolucao = document.getElementById('form-devolucao');
     const tabelaAlugueis = document.getElementById('tabela').getElementsByTagName('tbody')[0];
-    const senhaCorreta = 'admin123'; // Senha de acesso restrito (simulação)
+    const senhaCorreta = 'MR2311'; // Senha de acesso restrito (simulação)
 
     // Função para exibir os livros disponíveis na lista
     function exibirLivros() {

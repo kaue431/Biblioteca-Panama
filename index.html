@@ -43,6 +43,7 @@ const db = firebase.firestore();
     <main>
         <section id="livros">
             <h2>Livros Disponíveis</h2>
+            <input type="text" id="pesquisa-livro" placeholder="Pesquisar livro..." />
             <ul id="lista-livros">
                 <!-- Aqui serão listados os livros disponíveis -->
             </ul>
@@ -93,26 +94,26 @@ const db = firebase.firestore();
                 <input type="number" id="codigoDevolucao" required>
                 <button type="submit">Devolver</button>
             </form>
+            <section id="tabela-alugueis">
+                <h2>Aluguéis</h2>
+                <table id="tabela">
+                    <thead>
+                        <tr>
+                            <th>Nome do Livro</th>
+                            <th>Nome do Aluguel</th>
+                            <th>Sala</th>
+                            <th>Data de Aluguel</th>
+                            <th>Data de Devolução</th>
+                            <th>Código de Devolução</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Aqui serão listados os aluguéis -->
+                    </tbody>
+                </table>
+            </section>
         </div>
-    </section>
-    <section id="tabela-alugueis">
-        <h2>Aluguéis</h2>
-        <table id="tabela">
-            <thead>
-                <tr>
-                    <th>Nome do Livro</th>
-                    <th>Nome do Aluguel</th>
-                    <th>Sala</th>
-                    <th>Data de Aluguel</th>
-                    <th>Data de Devolução</th>
-                    <th>Código de Devolução</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Aqui serão listados os aluguéis -->
-            </tbody>
-        </table>
     </section>
     <footer>
         <p>&copy;vinycios167 & JK_19637 seguem lá 😎</p>

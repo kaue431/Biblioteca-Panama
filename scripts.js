@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const tabelaAlugueis = document.getElementById('tabela').getElementsByTagName('tbody')[0];
     const pesquisaLivro = document.getElementById('pesquisa-livro');
     const formAluguel = document.getElementById('form-aluguel');
-    const senhaCorreta = 'MR2311';
+    const senhaCorreta = '2reaisnopix';
 
     // Função para exibir livros na lista e no select
     function exibirLivros(filtro = '') {
